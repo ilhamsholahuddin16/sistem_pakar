@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Riwayat - Sistem Pakar Penyakit Lambung{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-file-medical text-primary"></i>
+            Detail Riwayat Konsultasi
+        </h2>
+    </div>
+
+    <!-- Consultation Info -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle"></i> Informasi Konsultasi
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>
+                        <strong><i class="fas fa-user"></i> Nama:</strong><br>
+                        {{ consultation.nama_user or 'Anonymous' }}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        <strong><i class="fas fa-calendar"></i> Tanggal Konsultasi:</strong><br>
+                        {{ consultation.tanggal_konsultasi.strftime('%d %B %Y, %H:%M WIB') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnosis Result -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-diagnoses"></i> Hasil Diagnosis
+        </div>
+        <div class="card-body">
+            <h4>{{ consultation.nama_penyakit }}</h4>
+            <span class="badge bg-primary mb-3">{{ consultation.kode_penyakit }}</span>
+
+            <h6 class="mt-3"><i class="fas fa-info-circle"></i> Deskripsi:</h6>
+            <p class="text-muted">{{ consultation.deskripsi }}</p>
+
+            <div class="alert alert-success">
+                <h6 class="alert-heading">
+                    <i class="fas fa-prescription-bottle-medical"></i> Saran & Solusi:
+                </h6>
+                <p class="mb-0">{{ consultation.solusi }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gejala yang Dipilih -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-list-check"></i> Gejala yang Dialami
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for gejala in gejala_terpilih %}
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>
+                            <strong>{{ gejala.kode_gejala }}</strong> - {{ gejala.nama_gejala }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <hr>
+            <small class="text-muted">
+                Total gejala yang dialami: <strong>{{ gejala_terpilih|length }}</strong>
+            </small>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center">
+        <a href="{{ url_for('riwayat') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Kembali ke Riwayat
+        </a>
+        <a href="{{ url_for('diagnosis') }}" class="btn btn-outline-primary">
+            <i class="fas fa-redo"></i> Diagnosis Baru
+        </a>
+    </div>
+</div>
+{% endblock %}

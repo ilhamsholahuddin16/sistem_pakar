@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Hasil Diagnosis - Sistem Pakar Penyakit Lambung{% endblock %}
+
+{% block extra_css %}
+<style>
+    .diagnosis-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+
+    .diagnosis-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .diagnosis-header h2 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+
+    .diagnosis-badge {
+        background: rgba(255,255,255,0.3);
+        padding: 10px 25px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-top: 15px;
+        font-size: 1.1rem;
+    }
+
+    .rule-matched-box {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .rule-badge {
+        background: white;
+        color: #f093fb;
+        padding: 15px 30px;
+        border-radius: 15px;
+        display: inline-block;
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin: 20px 0;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .gejala-badge {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        padding: 10px 18px;
+        border-radius: 12px;
+        margin: 6px;
+        display: inline-block;
+        border: 2px solid #bbdefb;
+        font-weight: 500;
+    }
+
+    .info-section {
+        padding: 35px;
+    }
+
+    .info-box {
+        background: #f8f9fa;
+        border-left: 5px solid #3498db;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+    }
+
+    .solution-box {
+        background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .checkmark-icon {
+        font-size: 4rem;
+        color: #4CAF50;
+        animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-clipboard-check text-success"></i>
+            Hasil Diagnosis
+        </h2>
+        {% if consultation.nama_user %}
+        <p class="text-muted">
+            Konsultasi untuk: <strong>{{ consultation.nama_user }}</strong>
+        </p>
+        {% endif %}
+        <p class="text-muted">
+            <i class="fas fa-calendar"></i>
+            {{ consultation.tanggal_konsultasi.strftime('%d %B %Y, %H:%M') }} WIB
+        </p>
+    </div>
+
+    <!-- Gejala yang Dipilih -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-list-check"></i> Gejala yang Anda Alami ({{ gejala_terpilih|length }} gejala)
+        </div>
+        <div class="card-body">
+            {% for gejala in gejala_terpilih %}
+            <span class="gejala-badge">
+                <i class="fas fa-check-circle"></i> <strong>{{ gejala.kode_gejala }}</strong> - {{ gejala.nama_gejala }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Gejala yang Cocok -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <i class="fas fa-check-double"></i> Gejala yang Cocok dengan Diagnosis ({{ gejala_cocok|length }} gejala)
+        </div>
+        <div class="card-body">
+            {% for gejala in gejala_cocok %}
+            <span class="gejala-badge" style="background-color: #d4edda; color: #155724; border-color: #c3e6cb;">
+                <i class="fas fa-star"></i> <strong>{{ gejala.kode_gejala }}</strong> - {{ gejala.nama_gejala }}
+            </span>
+            {% else %}
+            <p class="text-muted">Tidak ada gejala yang cocok secara spesifik.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Hasil Diagnosis -->
+    <div class="diagnosis-card mb-4">
+        <!-- Header Penyakit -->
+        <div class="diagnosis-header">
+            <i class="fas fa-check-circle checkmark-icon"></i>
+            <div class="diagnosis-badge">{{ consultation.kode_penyakit }}</div>
+            <h2 class="mt-3">{{ consultation.nama_penyakit }}</h2>
+            <p class="mb-0 mt-3" style="font-size: 1.1rem;">
+                <i class="fas fa-stethoscope"></i> Diagnosis Berdasarkan Forward Chaining Pattern Matching
+            </p>
+        </div>
+
+        <!-- Rule Match Section -->
+        <div class="rule-matched-box">
+            <h4 class="mb-3">
+                <i class="fas fa-sitemap"></i> Rule Pattern yang Cocok
+            </h4>
+            <div class="rule-badge">
+                {{ consultation.rule_matched }}
+            </div>
+            <div class="mt-3" style="font-size: 2.5rem; font-weight: bold;">
+                {{ consultation.match_percentage }}%
+            </div>
+            <p class="mt-2 mb-0" style="font-size: 1.1rem;">
+                <i class="fas fa-chart-line"></i>
+                Tingkat kecocokan gejala dengan diagnosis
+            </p>
+        </div>
+
+        <!-- Info Penyakit -->
+        <div class="info-section">
+            <div class="info-box">
+                <h5><i class="fas fa-info-circle text-primary"></i> Tentang Penyakit Ini</h5>
+                <p class="mb-0">{{ consultation.deskripsi }}</p>
+            </div>
+
+            <div class="solution-box">
+                <h5 style="color: #2d5016;">
+                    <i class="fas fa-prescription-bottle-medical"></i> Saran & Solusi Penanganan
+                </h5>
+                <p class="mb-0" style="color: #2d5016; font-weight: 500; font-size: 1.05rem;">
+                    {{ consultation.solusi }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="alert alert-danger">
+        <h6 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> Perhatian Penting
+        </h6>
+        <hr>
+        <ul class="mb-0">
+            <li>Hasil diagnosis ini hanya sebagai <strong>referensi awal</strong> dan bukan diagnosis medis resmi</li>
+            <li>Untuk diagnosis yang akurat dan penanganan yang tepat, <strong>segera konsultasikan dengan dokter</strong></li>
+            <li>Jika mengalami gejala berat seperti muntah/BAB berdarah, nyeri parah, atau demam tinggi, <strong>segera ke rumah sakit</strong></li>
+        </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mt-4 mb-4">
+        <a href="{{ url_for('diagnosis') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-redo"></i> Diagnosis Lagi
+        </a>
+        <a href="{{ url_for('riwayat') }}" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-history"></i> Lihat Riwayat
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-home"></i> Kembali ke Beranda
+        </a>
+    </div>
+</div>
+{% endblock %}

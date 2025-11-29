@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Tentang - Sistem Pakar Penyakit Lambung{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-info-circle text-primary"></i>
+            Tentang Sistem
+        </h2>
+    </div>
+
+    <!-- About System -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-laptop-medical"></i> Tentang Sistem Pakar Penyakit Lambung
+        </div>
+        <div class="card-body">
+            <p>
+                Sistem Pakar Penyakit Lambung adalah aplikasi berbasis web yang dikembangkan untuk membantu
+                diagnosis awal berbagai penyakit lambung berdasarkan gejala yang dialami oleh pasien.
+            </p>
+            <p>
+                Sistem ini menggunakan metode <strong>Forward Chaining</strong> dengan
+                <strong>Certainty Factor</strong> untuk melakukan inferensi dan menghitung tingkat keyakinan
+                diagnosis. Selain itu, sistem juga dilengkapi dengan fitur <strong>Pattern Matching</strong>
+                yang memanfaatkan riwayat konsultasi sebelumnya untuk meningkatkan akurasi diagnosis.
+            </p>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-star"></i> Fitur Utama
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-brain text-primary"></i> Forward Chaining</h5>
+                    <p>
+                        Metode inferensi yang bekerja dari fakta (gejala) menuju kesimpulan (penyakit).
+                        Sistem akan mencocokkan gejala yang dipilih dengan basis pengetahuan untuk
+                        menentukan penyakit yang paling sesuai.
+                    </p>
+
+                    <h5><i class="fas fa-percentage text-success"></i> Certainty Factor</h5>
+                    <p>
+                        Setiap rule memiliki nilai certainty factor (CF) dari pakar yang menunjukkan
+                        tingkat kepastian hubungan antara gejala dan penyakit. CF dikombinasikan
+                        untuk menghasilkan tingkat keyakinan diagnosis.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h5><i class="fas fa-project-diagram text-info"></i> Pattern Matching</h5>
+                    <p>
+                        Sistem menganalisis riwayat konsultasi dan mendeteksi pola gejala yang serupa.
+                        Menggunakan <strong>Jaccard Similarity</strong> untuk menghitung kesamaan antara
+                        gejala saat ini dengan riwayat, memberikan boost pada diagnosis yang pernah terjadi
+                        dengan pola serupa.
+                    </p>
+
+                    <h5><i class="fas fa-history text-warning"></i> Riwayat Konsultasi</h5>
+                    <p>
+                        Setiap diagnosis disimpan dalam database untuk tracking dan analisis.
+                        Riwayat ini digunakan oleh sistem pattern matching untuk meningkatkan
+                        akurasi diagnosis di masa depan.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diseases -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-disease"></i> Penyakit yang Dapat Didiagnosis
+        </div>
+        <div class="card-body">
+            <ol>
+                <li><strong>Gastritis (Maag)</strong> - Peradangan pada lapisan lambung</li>
+                <li><strong>GERD</strong> - Gastroesophageal Reflux Disease, asam lambung naik ke kerongkongan</li>
+                <li><strong>Tukak Lambung (Ulkus Peptikum)</strong> - Luka terbuka pada lapisan lambung</li>
+                <li><strong>Dispepsia Fungsional</strong> - Gangguan pencernaan tanpa penyebab organik jelas</li>
+                <li><strong>Gastroenteritis</strong> - Peradangan saluran pencernaan akibat infeksi</li>
+                <li><strong>Gastritis Erosif</strong> - Gastritis dengan erosi pada lapisan lambung</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-code"></i> Teknologi yang Digunakan
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Backend:</h6>
+                    <ul>
+                        <li>Python 3.x</li>
+                        <li>Flask Web Framework</li>
+                        <li>MySQL Database</li>
+                        <li>mysql-connector-python</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Frontend:</h6>
+                    <ul>
+                        <li>HTML5 & CSS3</li>
+                        <li>Bootstrap 5</li>
+                        <li>jQuery</li>
+                        <li>Font Awesome Icons</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="alert alert-warning">
+        <h5 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> Disclaimer
+        </h5>
+        <hr>
+        <p class="mb-0">
+            Sistem ini dikembangkan untuk tujuan edukasi dan sebagai alat bantu diagnosis awal.
+            Hasil diagnosis dari sistem ini <strong>BUKAN merupakan diagnosis medis resmi</strong>
+            dan tidak dapat menggantikan konsultasi langsung dengan dokter atau tenaga medis profesional.
+            Untuk diagnosis yang akurat dan penanganan yang tepat, <strong>selalu konsultasikan
+            kondisi Anda dengan dokter</strong>.
+        </p>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-home"></i> Kembali ke Beranda
+        </a>
+    </div>
+</div>
+{% endblock %}

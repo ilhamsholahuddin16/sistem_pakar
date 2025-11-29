@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Riwayat Konsultasi - Sistem Pakar Penyakit Lambung{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stats-icon {
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+
+    .history-item {
+        transition: all 0.3s;
+        border-left: 4px solid #3498db;
+    }
+
+    .history-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #3498db, #2ecc71);
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -7px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #3498db;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-history text-primary"></i>
+            Riwayat Konsultasi
+        </h2>
+        <p class="text-muted">Tracking semua konsultasi diagnosis yang pernah dilakukan</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Total Konsultasi</h6>
+                        <h3 class="mb-0 mt-2">{{ statistics.total_konsultasi }}</h3>
+                    </div>
+                    <i class="fas fa-clipboard-list stats-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Rata-rata Match</h6>
+                        <h3 class="mb-0 mt-2">{{ statistics.rata_rata_match }}%</h3>
+                    </div>
+                    <i class="fas fa-chart-line stats-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Data Tersimpan</h6>
+                        <h3 class="mb-0 mt-2">
+                            <i class="fas fa-check-circle"></i>
+                        </h3>
+                    </div>
+                    <i class="fas fa-database stats-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Penyakit Tersering -->
+    {% if statistics.penyakit_tersering %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-pie"></i> Penyakit Paling Sering Didiagnosis
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for penyakit in statistics.penyakit_tersering %}
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 40px; height: 40px;">
+                                {{ loop.index }}
+                            </div>
+                        </div>
+                        <div>
+                            <strong>{{ penyakit.nama_penyakit }}</strong><br>
+                            <small class="text-muted">{{ penyakit.jumlah }} kasus</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search/Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('riwayat') }}" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="nama"
+                           placeholder="🔍 Filter berdasarkan nama pasien..."
+                           value="{{ nama_filter or '' }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+            {% if nama_filter %}
+            <div class="mt-2">
+                <a href="{{ url_for('riwayat') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-times"></i> Hapus Filter
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- History List -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>
+                <i class="fas fa-list"></i> Daftar Riwayat Konsultasi
+            </span>
+            <span class="badge bg-primary">{{ history_list|length }} konsultasi</span>
+        </div>
+        <div class="card-body">
+            {% if history_list %}
+            <div class="timeline">
+                {% for history in history_list %}
+                <div class="card history-item mb-3" style="position: relative;">
+                    <div class="timeline-dot"></div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="card-title mb-2">
+                                    {{ history.nama_penyakit }}
+                                    <span class="badge bg-secondary">{{ history.kode_penyakit }}</span>
+                                </h5>
+                                <p class="mb-1">
+                                    <i class="fas fa-user text-muted"></i>
+                                    <strong>{{ history.nama_user or 'Anonymous' }}</strong>
+                                </p>
+                                <p class="mb-1">
+                                    <i class="fas fa-calendar text-muted"></i>
+                                    {{ history.tanggal_konsultasi.strftime('%d %B %Y, %H:%M') }}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="mb-2">
+                                    <small class="text-muted">Tingkat Kecocokan</small>
+                                    <h4 class="mb-0
+                                        {% if history.match_percentage >= 80 %}text-success
+                                        {% elif history.match_percentage >= 60 %}text-info
+                                        {% elif history.match_percentage >= 40 %}text-warning
+                                        {% else %}text-secondary{% endif %}">
+                                        {{ "%.1f"|format(history.match_percentage) }}%
+                                    </h4>
+                                </div>
+                                <a href="{{ url_for('riwayat_detail', riwayat_id=history.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center mb-0">
+                <i class="fas fa-info-circle"></i>
+                Belum ada riwayat konsultasi
+                {% if nama_filter %}
+                untuk nama "{{ nama_filter }}"
+                {% endif %}.
+                <br>
+                <a href="{{ url_for('diagnosis') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-stethoscope"></i> Mulai Diagnosis
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

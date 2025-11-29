@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Internal Server Error{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <div class="text-center py-5">
+        <i class="fas fa-server text-danger" style="font-size: 6rem;"></i>
+        <h1 class="display-1 fw-bold mt-4">500</h1>
+        <h2 class="mb-4">Internal Server Error</h2>
+        <p class="lead text-muted mb-4">
+            Maaf, terjadi kesalahan pada server. Tim kami sedang bekerja untuk memperbaikinya.
+        </p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-home"></i> Kembali ke Beranda
+        </a>
+    </div>
+</div>
+{% endblock %}

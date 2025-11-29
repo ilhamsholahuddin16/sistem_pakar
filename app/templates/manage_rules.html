@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Kelola Aturan - Sistem Pakar Penyakit Lambung{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">
+            <i class="fas fa-cogs text-primary"></i>
+            Kelola Aturan (Rules)
+        </h2>
+        <p class="text-muted">Halaman ini digunakan untuk mengelola basis pengetahuan sistem pakar.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Add Rule Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus-circle"></i> Tambah Rule Pattern Baru
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('manage_rules') }}">
+                <input type="hidden" name="action" value="add">
+                <div class="row g-3">
+                    <!-- Kolom Kiri: Info Rule & Penyakit -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="kode_rule" class="form-label"><strong>Kode Rule (Disarankan)</strong></label>
+                            <input type="text" class="form-control" id="kode_rule" name="kode_rule" value="{{ suggested_kode_rule }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nama_rule" class="form-label"><strong>Nama Rule</strong></label>
+                            <input type="text" class="form-control" id="nama_rule" name="nama_rule" placeholder="Contoh: Gastritis Akut Klasik" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_penyakit" class="form-label"><strong>Hasil Diagnosis (Penyakit)</strong></label>
+                            <select class="form-select" id="id_penyakit" name="id_penyakit" required>
+                                <option value="" disabled selected>Pilih Penyakit...</option>
+                                {% for penyakit in all_penyakit %}
+                                    <option value="{{ penyakit.id }}">{{ penyakit.kode_penyakit }} - {{ penyakit.nama_penyakit }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Kolom Kanan: Pilihan Gejala -->
+                    <div class="col-md-6">
+                        <label class="form-label"><strong>Kombinasi Gejala (Pilih satu atau lebih)</strong></label>
+                        <div class="mb-2">
+                            <input type="text" id="searchGejalaForm" class="form-control form-control-sm" placeholder="🔍 Cari gejala...">
+                        </div>
+                        <div class="gejala-checkbox-container border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                            {% for gejala in all_gejala %}
+                            <div class="form-check gejala-form-item">
+                                <input class="form-check-input" type="checkbox" name="gejala_ids" value="{{ gejala.id }}" id="gejala_{{ gejala.id }}">
+                                <label class="form-check-label" for="gejala_{{ gejala.id }}">
+                                    {{ gejala.kode_gejala }} - {{ gejala.nama_gejala }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label for="referensi" class="form-label"><strong>Referensi Jurnal (Opsional)</strong></label>
+                        <input type="text" class="form-control" id="referensi" name="referensi" placeholder="Contoh: Journal of Gastroenterology (2024)">
+                        <small class="text-muted">Masukkan referensi jurnal atau sumber ilmiah jika ada</small>
+                    </div>
+                </div>
+                <div class="text-end mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tambah Rule Baru
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Rules by Symptoms -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-search"></i> Cari Aturan Berdasarkan Kombinasi Gejala
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <label class="form-label"><strong>Pilih Gejala untuk Filter (dapat memilih lebih dari satu)</strong></label>
+                    <div class="mb-3">
+                        <input type="text" id="searchGejalaPencarian" class="form-control mb-2" placeholder="Ketik untuk mencari gejala...">
+                    </div>
+                    <div id="gejalaSearchContainer" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        {% for gejala in all_gejala %}
+                        <div class="form-check gejala-search-item">
+                            <input class="form-check-input gejala-filter-checkbox" type="checkbox" value="{{ gejala.kode_gejala }}" id="search_gejala_{{ gejala.id }}" data-gejala-name="{{ gejala.nama_gejala|lower }}">
+                            <label class="form-check-label" for="search_gejala_{{ gejala.id }}">
+                                {{ gejala.kode_gejala }} - {{ gejala.nama_gejala }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnFilterRules">
+                            <i class="fas fa-filter"></i> Terapkan Filter
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnResetFilter">
+                            <i class="fas fa-redo"></i> Reset Filter
+                        </button>
+                        <span id="filterInfo" class="ms-3 text-muted"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Existing Rules Table -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-list-ul"></i> Daftar Aturan yang Ada
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="rulesTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Kode Rule</th>
+                            <th scope="col">Nama Rule (Penyakit)</th>
+                            <th scope="col">Gejala</th>
+                            <th scope="col">Referensi</th>
+                            <th scope="col" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in all_rules %}
+                        <tr data-gejala="{{ rule.kode_gejala }}">
+                            <td><strong>{{ rule.kode_rule }}</strong></td>
+                            <td>{{ rule.nama_rule }} ({{ rule.nama_penyakit }})</td>
+                            <td>{{ rule.kode_gejala }} - {{ rule.nama_gejala }}</td>
+                            <td>{{ rule.referensi if rule.referensi else '-' }}</td>
+                            <td class="text-center">
+                                <form method="POST" action="{{ url_for('manage_rules') }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus gejala ini dari aturan?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="rule_id" value="{{ rule.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus gejala dari rule">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="noDataRow">
+                            <td colspan="5" class="text-center text-muted">Belum ada aturan yang ditambahkan.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality for gejala in ADD RULE form
+    const searchGejalaForm = document.getElementById('searchGejalaForm');
+    const gejalaFormItems = document.querySelectorAll('.gejala-form-item');
+
+    searchGejalaForm.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+
+        gejalaFormItems.forEach(function(item) {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Search functionality for gejala filter
+    const searchInput = document.getElementById('searchGejalaPencarian');
+    const gejalaItems = document.querySelectorAll('.gejala-search-item');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+
+        gejalaItems.forEach(function(item) {
+            const label = item.querySelector('label').textContent.toLowerCase();
+            if (label.includes(searchTerm)) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Filter rules by selected symptoms
+    const btnFilter = document.getElementById('btnFilterRules');
+    const btnReset = document.getElementById('btnResetFilter');
+    const filterInfo = document.getElementById('filterInfo');
+    const tableRows = document.querySelectorAll('#rulesTable tbody tr:not(#noDataRow)');
+
+    btnFilter.addEventListener('click', function() {
+        const selectedGejala = [];
+        document.querySelectorAll('.gejala-filter-checkbox:checked').forEach(function(checkbox) {
+            selectedGejala.push(checkbox.value);
+        });
+
+        if (selectedGejala.length === 0) {
+            alert('Pilih minimal satu gejala untuk filter!');
+            return;
+        }
+
+        let visibleCount = 0;
+
+        tableRows.forEach(function(row) {
+            const rowGejala = row.getAttribute('data-gejala');
+
+            // Check if row contains ALL selected symptoms
+            const hasAllSymptoms = selectedGejala.every(function(gejalaKode) {
+                return rowGejala.includes(gejalaKode);
+            });
+
+            if (hasAllSymptoms) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        filterInfo.textContent = `Menampilkan ${visibleCount} rule dengan gejala: ${selectedGejala.join(', ')}`;
+        filterInfo.className = 'ms-3 text-primary fw-bold';
+    });
+
+    btnReset.addEventListener('click', function() {
+        // Uncheck all checkboxes
+        document.querySelectorAll('.gejala-filter-checkbox:checked').forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+
+        // Show all rows
+        tableRows.forEach(function(row) {
+            row.style.display = '';
+        });
+
+        // Clear filter info
+        filterInfo.textContent = '';
+        filterInfo.className = 'ms-3 text-muted';
+
+        // Clear search input
+        searchInput.value = '';
+
+        // Show all gejala items
+        gejalaItems.forEach(function(item) {
+            item.style.display = 'block';
+        });
+    });
+});
+</script>
+
+{% endblock %}
