@@ -8,9 +8,9 @@ from mysql.connector import Error
 
 # Konfigurasi database
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'isganteng16'
+    'host': '',
+    'user': '',
+    'password': ''
 }
 
 def run_sql_file(cursor, filepath):
