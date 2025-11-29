@@ -1,6 +1,6 @@
 # Sistem Pakar Penyakit Lambung
 
-Sistem pakar untuk diagnosis penyakit lambung menggunakan metode **Forward Chaining** dengan **Certainty Factor** dan **Pattern Matching** berbasis riwayat konsultasi.
+Sistem pakar untuk diagnosis penyakit lambung menggunakan metode **Forward Chaining** dengan **Certainty Factor** berbasis riwayat konsultasi.
 
 ## Fitur Utama
 
